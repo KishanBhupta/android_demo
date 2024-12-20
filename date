@@ -1,0 +1,94 @@
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.*
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val etIncrementDate: EditText = findViewById(R.id.etIncrementDate)
+        val btnIncrementDate: Button = findViewById(R.id.btnIncrementDate)
+        val tvIncrementedDateResult: TextView = findViewById(R.id.tvIncrementedDateResult)
+
+        // Add TextWatcher to format date while typing
+        etIncrementDate.addTextChangedListener(object : TextWatcher {
+            private var current = ""
+            private val yyyymmdd = "YYYYMMDD"
+            private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s.toString() != current) {
+                    val clean = s.toString().replace("[^\\d]".toRegex(), "") // Remove non-digit characters
+                    val cleanCurrent = current.replace("[^\\d]".toRegex(), "")
+
+                    val cleanLength = clean.length
+                    var formattedDate = ""
+
+                    if (clean != cleanCurrent) {
+                        val dayMonthYear = arrayOf("", "", "")
+
+                        for (i in clean.indices) {
+                            when (i) {
+                                in 0..3 -> dayMonthYear[0] += clean[i] // Year
+                                in 4..5 -> dayMonthYear[1] += clean[i] // Month
+                                in 6..7 -> dayMonthYear[2] += clean[i] // Day
+                            }
+                        }
+
+                        val year = dayMonthYear[0]
+                        val month = dayMonthYear[1].padEnd(2, '0') // Ensure 2 digits for month
+                        val day = dayMonthYear[2].padEnd(2, '0') // Ensure 2 digits for day
+
+                        formattedDate = when (cleanLength) {
+                            in 1..4 -> year
+                            in 5..6 -> "$year-$month"
+                            in 7..8 -> "$year-$month-$day"
+                            else -> "$year-$month-$day"
+                        }
+                    }
+
+                    current = formattedDate
+                    etIncrementDate.removeTextChangedListener(this)
+                    etIncrementDate.setText(formattedDate)
+                    etIncrementDate.setSelection(formattedDate.length.coerceAtMost(etIncrementDate.text.length)) // Set cursor
+                    etIncrementDate.addTextChangedListener(this)
+                }
+            }
+        })
+
+        // Button click listener to increment the date by one month
+        btnIncrementDate.setOnClickListener {
+            val inputDate = etIncrementDate.text.toString()
+            val result = incrementDateByOneMonth(inputDate)
+            tvIncrementedDateResult.text = result
+        }
+    }
+
+    // Function to increment the date by one month
+    private fun incrementDateByOneMonth(date: String): String {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val parsedDate = dateFormat.parse(date)!!
+
+            val calendar = Calendar.getInstance()
+            calendar.time = parsedDate
+            calendar.add(Calendar.MONTH, 1) // Add one month
+
+            dateFormat.format(calendar.time) // Return the new date in yyyy-MM-dd format
+        } catch (e: Exception) {
+            "Invalid date format. Please use yyyy-MM-dd"
+        }
+    }
+}
