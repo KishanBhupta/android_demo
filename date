@@ -92,3 +92,73 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+
+
+
+import java.text.SimpleDateFormat
+import java.util.*
+
+// Function to calculate the difference between two dates
+fun calculateDateDifference(startDate: String, endDate: String): String {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val start = dateFormat.parse(startDate)!!
+    val end = dateFormat.parse(endDate)!!
+    
+    val calendarStart = Calendar.getInstance().apply { time = start }
+    val calendarEnd = Calendar.getInstance().apply { time = end }
+    
+    val years = calendarEnd.get(Calendar.YEAR) - calendarStart.get(Calendar.YEAR)
+    val months = calendarEnd.get(Calendar.MONTH) - calendarStart.get(Calendar.MONTH)
+    val days = calendarEnd.get(Calendar.DAY_OF_MONTH) - calendarStart.get(Calendar.DAY_OF_MONTH)
+    
+    val adjustedMonths = if (days < 0) months - 1 else months
+    val adjustedDays = if (days < 0) days + calendarStart.getActualMaximum(Calendar.DAY_OF_MONTH) else days
+    val adjustedYears = if (adjustedMonths < 0) years - 1 else years
+    
+    return "${adjustedYears} years, ${adjustedMonths.coerceAtLeast(0)} months, ${adjustedDays.coerceAtLeast(0)} days"
+}
+
+// Function to convert date from yyyy-mm-dd to dd-mm-yyyy
+fun convertDateFormat(date: String): String {
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    val parsedDate = inputFormat.parse(date)!!
+    return outputFormat.format(parsedDate)
+}
+
+// Function to convert date to timestamp
+fun dateToTimestamp(date: String): Long {
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    return dateFormat.parse(date)!!.time / 1000
+}
+
+// Function to convert seconds into days, hours, minutes, and seconds
+fun convertSeconds(seconds: Int): String {
+    val days = seconds / (24 * 3600)
+    val remainingSecondsAfterDays = seconds % (24 * 3600)
+    val hours = remainingSecondsAfterDays / 3600
+    val remainingSecondsAfterHours = remainingSecondsAfterDays % 3600
+    val minutes = remainingSecondsAfterHours / 60
+    val sec = remainingSecondsAfterHours % 60
+    return "$days days, $hours hours, $minutes minutes and $sec seconds"
+}
+
+// Function to increment date by one month
+fun incrementDateByOneMonth(date: String): String {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val parsedDate = dateFormat.parse(date)!!
+    val calendar = Calendar.getInstance()
+    calendar.time = parsedDate
+    calendar.add(Calendar.MONTH, 1)
+    return dateFormat.format(calendar.time)
+}
+
+// Main function to test the scripts
+fun main() {
+    println("1. Date Difference: " + calculateDateDifference("1981-11-04", "2013-09-04"))
+    println("2. Date Format Conversion: " + convertDateFormat("2012-09-12"))
+    println("3. Date to Timestamp: " + dateToTimestamp("12-05-2014"))
+    println("4. Seconds Conversion: " + convertSeconds(200000))
+    println("5. Increment Date by One Month: " + incrementDateByOneMonth("2012-12-21"))
+}
